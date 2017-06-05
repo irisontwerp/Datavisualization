@@ -1,0 +1,60 @@
+import json
+
+size(400, 535)
+background(1)
+
+def mapValue(value, fromMin, fromMax, toMin, toMax):
+    # Figure out how 'wide' each range is
+    fromSpan = fromMax - fromMin
+    toSpan = toMax - toMin
+    
+    # Convert the from range into a 0-1 range (float)
+    valueScaled = float(value - fromMin) / float(fromSpan)
+    
+    # Convert the 0-1 range into a value in the to range.
+    return toMin + (valueScaled * toSpan)
+
+def xOfDot(lon):
+    return mapValue(lon, 2.9, 7.7, 0, WIDTH)
+
+def yOfDot(lat):
+    return mapValue(lat, 50.2, 54, HEIGHT, 0)
+
+with open("freeformatter2.json", 'r') as inputFile:
+    citiesData = json.load(inputFile)
+
+min_hardheid = 9999
+max_hardheid = -9999
+
+
+for country in citiesData:
+    if country.has_key('cities'):
+        for city in country['cities']:
+            if city.has_key('Gemiddelde waterhardheid'):
+                
+                hardheid = city['Gemiddelde waterhardheid']
+                if hardheid < min_hardheid:
+                    min_hardheid = hardheid
+                if hardheid > max_hardheid:
+                    max_hardheid = hardheid
+                    
+                
+print "min_hardheid: "+str(min_hardheid)
+print "max_hardheid: "+str(max_hardheid)
+
+
+for country in citiesData:
+    if country.has_key('cities'):
+        for city in country['cities']:
+            if city.has_key('Gemiddelde waterhardheid'):
+                # convert lat / lon
+                x = xOfDot(city['longitude'])
+                y = yOfDot(city['latitude'])
+                #pixel size
+                diameter = mapValue(city['Gemiddelde waterhardheid'], 2.1, 13.6, 5.5, 1)
+                r= mapValue(city['Gemiddelde waterhardheid'], 2.1, 13.6, 66 ,142) /255.0
+                g= mapValue(city['Gemiddelde waterhardheid'], 2.1, 13.6, 33, 80) /255.0
+                b= mapValue(city['Gemiddelde waterhardheid'], 2.1, 13.6, 1, 19) /255.0
+                col = color(r,g,b,0.6)
+                fill(col)
+                oval(x, y, diameter, diameter)
